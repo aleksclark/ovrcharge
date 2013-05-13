@@ -96,4 +96,4 @@ def show_provider(prov_id):
         drgs.append(row)
     return render_template('provider.html', info=info, drgs=drgs)
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port='80')
+    app.run(debug=False, host='0.0.0.0', port=80)
