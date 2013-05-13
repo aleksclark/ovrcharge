@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="hero-unit">
+    <h1>{{info['name']}}</h1>
+    <p>{{info['address']}}</p>
+    <p>{{info['city']}}</p>
+    <p>{{info['state']}}</p>
+    <p>{{info['zip']}}</p>
+    <p>Average Overcharge: {{info['avg_overcharge']}}%</p>
+
+</div>
+
+<div class="row">
+    <div class="span12">
+        <table class="table table-striped table-bordered table-hover table-condensed">
+            <tr>
+                <th>% Over</th>
+                <th>DRG</th>
+                <th>Discharges</th>
+                <th>Avg Charge</th>
+                <th>Avg Payment</th>
+
+            </tr>
+
+            {% for drg in drgs %}
+                <tr>
+                    <td>{{drg['overcharge']}}%</td>
+                    <td>{{drg['name']}}</td>
+                    <td>{{drg['discharges']}}</td>
+                    <td>${{drg['charges']}}</td>
+                    <td>${{drg['payments']}}</td>
+
+
+            {% endfor %}
+        </table>
+
+    </div>
+
+</div>
+{% endblock %}

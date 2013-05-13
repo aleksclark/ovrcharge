@@ -37,8 +37,9 @@ with open('charges.csv', 'rb') as csvfile:
             overcharge = int(overcharge * 100)
             #print overcharge
             p.sadd('drg', drg_code)
+            p.zadd('drg_names', drg_code, data['DRG Definition'])
             p.set('drg:' + drg_code + ":desc", data['DRG Definition'])
-            p.sadd('providers', prov_id)
+            p.zadd('providers', overcharge, prov_id)
             p.hset('providers:' + prov_id, "name", data['Provider Name'])
             p.hset('providers:' + prov_id, "address", data['Provider Street Address'])
             p.hset('providers:' + prov_id, "city", data['Provider City'])
@@ -46,6 +47,7 @@ with open('charges.csv', 'rb') as csvfile:
             p.hset('providers:' + prov_id, "zip", data['Provider Zip Code'])
 
             p.sadd('zips', data['Provider Zip Code'])
+            # p.zadd('zip:' + data['Provider Zip Code'], data['Provider Zip Code'], prov_id)
             # p.sadd('regions', data['Hospital Referral Region Description'])
 
             p.set('drg:' + drg_code + ':' + prov_id + ':discharges', data['Total Discharges'])
@@ -61,7 +63,7 @@ with open('charges.csv', 'rb') as csvfile:
 
 counter = 0
 
-providers = r.smembers('providers')
+providers = r.zrange('providers', 0, -1)
 drgs = r.smembers('drg')
 
 for provider in providers:
@@ -85,7 +87,7 @@ for provider in providers:
         # p.sadd('zip:' + data['Provider Zip Code'], prov_id)
 counter = 0
 
-providers = r.smembers('providers')
+
 # drgs = r.smembers('drg')
 
 for provider in providers:

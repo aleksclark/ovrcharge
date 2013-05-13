@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- Main hero unit for a primary marketing message or call to action -->
+
+<div class="row">
+    <div class="span12">
+        <table class="table table-striped table-bordered table-hover table-condensed">
+            <tr>
+                <th>% Over</th>
+                <th>Name</th>
+                <th>City</th>
+                <th>State</th>
+            </tr>
+
+            {% for prov in providers %}
+                <tr>
+                    <td>{{prov['score']}}%</td>
+                    <td><a href="/providers/{{prov['id']}}">{{prov['name']}}</a></td>
+                    <td>{{prov['city']}}</td>
+                    <td>{{prov['state']}}</td>
+
+            {% endfor %}
+        </table>
+
+    </div>
+
+</div>
+{% endblock %}
