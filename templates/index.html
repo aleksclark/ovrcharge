@@ -17,12 +17,13 @@
 <!-- Example row of columns -->
 <div class="row">
     <div class="span12">
-        <h2>Rank Them!</h2>
+        <h2>Text Search:</h2>
         <form class="form-inline" action="/textsearch" method="POST">
             <input type="text" class="input" placeholder="search..." name="search">
             <button type="submit" class="btn">Search</button>
         </form>
 
+        <h2>Filter Search:</h2>
         <form class="form-inline" action="/search" method="POST">
             <select name="state" size="1">
                 <option value="">State</option>
