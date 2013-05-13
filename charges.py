@@ -13,10 +13,28 @@ def index():
 
     return render_template('index.html', drgs=drgs)
 
+@app.route("/textsearch", methods=['POST'])
+def textsearch():
+    search = request.form['search']
+    tokens = search.lower().split(" ")
+    keys = []
+    for token in tokens:
+        keys.append("text:" + token)
+    #print keys
+    providers = r.sinter(keys)
+    #print providers
+    res = []
+    for prov in providers:
+        prov_id= prov
+        info = r.hgetall('providers:' + prov_id)
+        res.append({'id': prov_id, 'name': info['name'], 'city': info['city'], 'state': info['state'], 'score': info['avg_overcharge']})
+
+    return render_template('list.html', providers=res)
+
 @app.route("/search", methods=['POST'])
 def search():
     key = ""
-    print request.form
+    #print request.form
     if 'state' in request.form and request.form['state'] != "":
         key = key + "state:" + request.form['state']
         union = False
@@ -63,7 +81,7 @@ def search():
     else:
         key = 'providers'
 
-    print "key is " + key
+    #print "key is " + key
 
     try:
         desc = request.form['reverse']
@@ -83,7 +101,7 @@ def search():
 def show_provider(prov_id):
     info = r.hgetall('providers:' + prov_id)
     drg_list = r.zrange('drg_names', 0, -1)
-    print len(drg_list)
+    #print len(drg_list)
     drgs = []
     for drg in drg_list:
         row = {}
@@ -96,4 +114,4 @@ def show_provider(prov_id):
         drgs.append(row)
     return render_template('provider.html', info=info, drgs=drgs)
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=80)
+    app.run(debug=True, host='0.0.0.0', port=5000)
