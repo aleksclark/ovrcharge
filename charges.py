@@ -108,10 +108,11 @@ def show_provider(prov_id):
         row['code'] = drg[0:3]
         row['name'] = drg
         row['discharges'] = r.get('drg:' + row['code'] + ':' + prov_id + ':discharges')
-        row['charges'] = r.get('drg:' + row['code'] + ':' + prov_id + ':charges')
-        row['payments'] = r.get('drg:' + row['code'] + ':' + prov_id + ':payments')
-        row['overcharge'] = r.get('drg:' + row['code'] + ':' + prov_id + ':overcharge')
-        drgs.append(row)
+        if row['discharges'] is not None:
+            row['charges'] = r.get('drg:' + row['code'] + ':' + prov_id + ':charges')
+            row['payments'] = r.get('drg:' + row['code'] + ':' + prov_id + ':payments')
+            row['overcharge'] = r.get('drg:' + row['code'] + ':' + prov_id + ':overcharge')
+            drgs.append(row)
     return render_template('provider.html', info=info, drgs=drgs)
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
