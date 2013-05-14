@@ -31,6 +31,10 @@ def textsearch():
 
     return render_template('list.html', providers=res)
 
+@app.route("/about", methods=['GET'])
+def about():
+    return render_template('about.html')
+
 @app.route("/search", methods=['POST'])
 def search():
     key = ""
