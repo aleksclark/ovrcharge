@@ -35,5 +35,22 @@ for provider in providers:
     terms = agg_string.lower().split(" ")
     for term in terms:
         if term != "":
-            p.sadd('text:' + term, provider)
+            p.sadd('text:provider:' + term, provider)
+    p.execute()
+
+drgs = r.smembers('drg')
+
+for drg in drgs:
+    tokens = r.get('drg:' + drg + ":desc").lower().split(" ")
+    for token in tokens:
+        if token != "":
+            p.sadd('text:drg:' + token, drg)
+    p.execute()
+
+zips = r.smembers('zips')
+for zip_code in zips:
+    pref = zip_code[0:3]
+    providers = r.zrange('zip:' + zip_code, 0, -1)
+    for prov in providers:
+        p.sadd('text:zip:' + pref, prov)
     p.execute()

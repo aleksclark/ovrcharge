@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
 <!-- Main hero unit for a primary marketing message or call to action -->
-
+{% if providers|length > 0 %}
 <div class="row">
+    <h1>Matched Providers:</h1>
     <div class="span12">
         <table class="table table-striped table-bordered table-hover table-condensed" id="provider_table">
             <thead>
@@ -28,4 +29,36 @@
     </div>
 
 </div>
+{% endif %}
+{% if drgs|length > 0 %}
+<div class="row">
+    <h1>Matched DRGs:</h1>
+    <div class="span12">
+        <table class="table table-striped table-bordered table-hover table-condensed" id="drg_table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Desc</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for drg in drgs %}
+                    <tr>
+                        <td>{{drg}}%</td>
+                        <td><a href="/drgs/{{drg}}">{{drgs[drg]}}</a></td>
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+{% endif %}
+{% if drgs|length == 0 and providers|length == 0 %}
+<div class="row">
+    <h1>No results.</h1>
+</div>
+{% endif %}
 {% endblock %}

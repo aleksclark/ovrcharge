@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, Response
 import redis
-
+import re
 app = Flask(__name__)
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
 
@@ -13,93 +13,53 @@ def index():
 
     return render_template('index.html', drgs=drgs)
 
-@app.route("/textsearch", methods=['POST'])
-def textsearch():
-    search = request.form['search']
-    tokens = search.lower().split(" ")
-    keys = []
-    for token in tokens:
-        keys.append("text:" + token)
-    #print keys
-    providers = r.sinter(keys)
-    #print providers
-    res = []
-    for prov in providers:
-        prov_id= prov
-        info = r.hgetall('providers:' + prov_id)
-        res.append({'id': prov_id, 'name': info['name'], 'city': info['city'], 'state': info['state'], 'score': info['avg_overcharge']})
-
-    return render_template('list.html', providers=res)
-
 @app.route("/about", methods=['GET'])
 def about():
     return render_template('about.html')
 
-@app.route("/search", methods=['POST'])
-def search():
-    key = ""
-    #print request.form
-    if 'state' in request.form and request.form['state'] != "":
-        key = key + "state:" + request.form['state']
-        union = False
-        if 'zip' in request.form and request.form['zip'] != "":
-            union = True
-            new_key = "zip:" + request.form['zip']
-            union_key = key + ":" + new_key
-            if not r.exists(union_key):
-                r.zinterstore(union_key, {key:0, new_key:1})
-            key = union_key
-            r.expire(key, 6000)
 
-        if 'drg' in request.form and request.form['drg'] != "":
-            union = True
-            new_key = "drg:" + request.form['drg'] + ":providers"
-            union_key = key + ":" + new_key
-            if not r.exists(union_key):
-                r.zinterstore(union_key, {key:0, new_key:1})
-            key = union_key
-            r.expire(key, 6000)
+@app.route("/search", methods=['GET'])
+def newsearch():
+    search_string = request.args.get('search_string')
+    is_zip = re.match('^\d{5}', search_string)
+    if is_zip:
+        key = is_zip.string[0:3]
+        providers = r.smembers('text:zip:' + key)
+        provider_info = []
 
-        if not union:
-            key = "state:" + request.form['state']
-
-    elif 'zip' in request.form and request.form['zip'] != "":
-        key = key + "zip:" + request.form['zip']
-        union = False
-
-        if 'drg' in request.form and request.form['drg'] != "":
-            union = True
-            new_key = "drg:" + request.form['drg'] + ":providers"
-            union_key = key + ":" + new_key
-            if not r.exists(union_key):
-                r.zinterstore(union_key, {key:0, new_key:1})
-            key = union_key
-            r.expire(key, 6000)
-
-        if not union:
-            key = "zip:" + request.form['zip']
-
-    elif 'drg' in request.form and request.form['drg'] != "":
-        key = "drg:" + request.form['drg'] + ":providers"
+        for prov in providers:
+            prov_id = prov
+            info = r.hgetall('providers:' + prov_id)
+            provider_info.append({'id': prov_id, 'name': info['name'], 'city': info['city'], 'state': info['state'], 'score': info['avg_overcharge']})
+        return render_template('list.html', providers=provider_info, drgs=[])
 
     else:
-        key = 'providers'
+        tokens = search_string.split(" ")
+        keys = []
+        for token in tokens:
+            keys.append("text:provider:" + token)
 
-    #print "key is " + key
+        providers = r.sinter(keys)
 
-    try:
-        desc = request.form['reverse']
-    except KeyError, e:
-        desc = False
+        provider_info = []
+        for prov in providers:
+            prov_id = prov
+            info = r.hgetall('providers:' + prov_id)
+            provider_info.append({'id': prov_id, 'name': info['name'], 'city': info['city'], 'state': info['state'], 'score': info['avg_overcharge']})
 
-    providers = r.zrange(key, 0, 100, withscores=True, desc=desc)
-    res = []
-    for prov in providers:
-        prov_id, score = prov
-        info = r.hgetall('providers:' + prov_id)
-        res.append({'id': prov_id, 'name': info['name'], 'city': info['city'], 'state': info['state'], 'score': score})
+        keys = []
+        for token in tokens:
+            keys.append("text:drg:" + token)
 
-    return render_template('list.html', providers=res)
+        drgs = r.sinter(keys)
+        keys = []
+        for drg in drgs:
+            keys.append('drg:' + drg + ':desc')
+
+        drg_descs = r.mget(keys, None)
+        drgs = dict(zip(drgs, drg_descs))
+
+        return render_template('list.html', providers=provider_info, drgs=drgs)
 
 @app.route("/providers/<string:prov_id>/")
 def show_provider(prov_id):
