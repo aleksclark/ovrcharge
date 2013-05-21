@@ -7,6 +7,8 @@ ovrcharge
 
 Read more:  http://swampland.time.com/2013/05/08/an-end-to-medical-billing-secrecy/
 
-Alex S Clark built a UI that's searchable encompassing all of this data to help everyday Americans, and potential patients, understand the discrepancies in our health care system pricing.
+Aleks Clark built a UI that's searchable encompassing all of this data to help everyday Americans, and potential patients, understand the discrepancies in our health care system pricing.
 
+Dependencies: Flask, Redis
 
+Install: run charge_loader.py and search_builder.py once, then run python charges.py to run the web app.
